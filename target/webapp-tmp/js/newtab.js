@@ -601,6 +601,7 @@ function getTypeOfAnalysis(e){
 
 	}
 	if(activeAnalysisHeader.id === "today"){
+		document.getElementById("analysis_type").innerText = "Today";
 		activeAnalysisHeader.style.color = "black";
 		showChart(new Date());
 
@@ -614,6 +615,7 @@ function getTypeOfAnalysis(e){
 		//showChart(new Date(date));
 	}
 	else if(activeAnalysisHeader.id === "all_time"){
+        document.getElementById("analysis_type").innerText = "All Time";
 		activeAnalysisHeader.style.color = "black";
 		showChart(null);
 	}
@@ -701,10 +703,27 @@ async function showChart(date){
 			todayData.labels = ['No Data'];
 			todayData.datasets[0].data = ['1'];
 		}
+		setTotalTime(totalTimeSpend);
 			todayAnalysis.update();
 			todayAnalysis.render();
 
 	});
+}
+
+function setTotalTime(totalTimeSpend){
+	var time = ""+getTimeSpend(totalTimeSpend);
+	var formattedTime = "";
+	var timeparts = time.split(",");
+    if(timeparts.length === 3){
+        formattedTime = timeparts[0]+":"+timeparts[1]+":"+timeparts[2];
+    }
+    else if(timeparts.length === 2){
+        formattedTime = "00:"+timeparts[0]+":"+timeparts[1];
+    }
+    else if(timeparts.length === 1){
+        formattedTime = "00:00:"+timeparts[0];
+    }
+    document.getElementById("time_spent").innerText = formattedTime;
 }
 
 
@@ -900,10 +919,14 @@ function createRow(result, key, id){
 	row.appendChild(percentage);
 	row.appendChild(percentageMark);
 	row.appendChild(empty2);
-	row.appendChild(hour);
-	row.appendChild(hMark);
-	row.appendChild(min);
-	row.appendChild(mMark);
+	if(hours != "00") {
+        row.appendChild(hour);
+        row.appendChild(hMark);
+    }
+    if(mins != "00") {
+        row.appendChild(min);
+        row.appendChild(mMark);
+    }
 	row.appendChild(sec);
 	row.appendChild(sMark);
 

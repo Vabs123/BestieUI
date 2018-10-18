@@ -121,7 +121,7 @@ cursor: pointer;
 #analysis_header{
    border: 1px solid silver;
    background-color: silver;
-   width: 30%;
+   width: 18%;
    margin-left:auto;
    margin-right: auto;
    padding: 10px;
@@ -239,7 +239,7 @@ cursor: pointer;
 
 #statistics{
  
-  margin-top: 10%;
+  margin-top: 40%;
 }
 
 #fix {
@@ -569,16 +569,13 @@ input[type=range] {
 ">
         <h1 style=" font-size: 60px;
     font-weight: 300;"><span style="color:red">B</span><span style="color:orange">e</span><span style="color:purple">s</span><span style="color:green">t</span><span style="color:blue">i</span><span style="color:purple">e</span><span style="color:red">.</span><span style="color:orange">.</span><span style="color:gold">!</span></h1>
-        <p>Hi, My name is Bestie. I will bring the best out of you. </p>
+        <p>Brings the best out of you. </p>
       </div> 
 
 
     </div>
 
-  <div style="color: white; font-size: 1050%; text-align: center;">
-      <p style="font-size: 50%">Time Spent on Social Media: Today</p>
-      <span>01:45:01</span>
-  </div>
+
 
 
 
@@ -588,7 +585,13 @@ input[type=range] {
 
 
   <div id = "analysis_header">
-    <span id = "today"> Today</span> <span id = "select_day">Select Day</span> <span id = "all_time">All Time</span><a href="#statistics"> <span id = "stats" >Stats</span></a>
+    <span id = "today"> Today</span>  <span id = "all_time">All Time</span><a href="#statistics"> <span id = "stats" >Stats</span></a>
+      <!--<span id = "select_day">Select Day</span>-->
+  </div>
+  <div style="color: white; font-size: 1050%; text-align: center;">
+
+      <span id = "time_spent">01:45:01</span>
+      <p style="font-size: 25%">Time Spent on Social Media:<span id = "analysis_type"> Today</span></p>
   </div>
 
 <div>
@@ -601,15 +604,16 @@ input[type=range] {
  
 
 
-  <div class = "container shadow-lg p-3 mb-5 bg-white rounded" id = "check" style="opacity: 0.85;">
+  <!--<div class = "container shadow-lg p-3 mb-5 bg-white rounded" id = "check" style="opacity: 0.85;">-->
     
-    <div id="canvas-holder" style="width:35%; display:inline-block; text-align: center;  vertical-align: middle; " >
+    <div id="canvas-holder" style="width: 25%;display:inline-block;position: absolute;top: 51%;left: 5%; background-color: white; opacity: 0.85; border-radius: 400px; " >
      <canvas id="chart-area"  ></canvas>
    </div>
 
-   <div   id = "table" style=" display:inline-block; vertical-align: middle;" >
+   <div   id = "table" style=" display:inline-block; position: absolute; right: 2.5%; top:61% ; background-color: white; padding: 1%; border-radius: 4%; opacity: 0.75;"  >
     
     <table id = "data_table" width = "100%" height = "250" style="font-size: 10px; text-align: right;">
+
       <!--<col width="0">-->
       <!--<col width="200">-->
       <!--<col width="0">-->
@@ -631,11 +635,11 @@ input[type=range] {
 
   </div>
 
-</div>
+<!--</div>-->
 
 
 
-<div id = "statistics" class = "container shadow-lg p-3 mb-5 bg-white rounded" style="display: none;">
+<div id = "statistics" class = "container shadow-lg p-3 mb-5 bg-white rounded" style="display: none; opacity: 0.95;">
  <span id = "close"><i class="fa fa-times fa-2x" aria-hidden="true"></i></span>
  
 
