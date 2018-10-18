@@ -1,9 +1,6 @@
 
-//console.log("hello")
-//Doughnut Chart
 var data = [];
 var labels = [];
-var BGCOLOR = ["purple", "#0000FF", "#70726F", "#1D5907","#A52A2A","#DC143C","#008B8B","#FF8C00", "#8B0000", "#228B22","#FFD700", "#FF4500","#9ACD32"];
 var bColor = [];
 var canvas = null;
 var ctx = null;
@@ -25,235 +22,35 @@ var barMaxSiteTimeFind = {};
 var barTotalTime = 0;
 var activeDeafultStats = null;
 
-var EXTENSION_ID = "odljaphhcggnlafaaonbbnpbofigmelf";
-//console.log(chrome.runtime.id);
-
-
-Chart.pluginService.register({
-	beforeDraw: function (chart) {
-		if (chart.config.options.elements.center) {
-        //Get ctx from string
-        var ctx = chart.chart.ctx;
-
-				//Get options from the center object in options
-				var centerConfig = chart.config.options.elements.center;
-				var fontStyle = centerConfig.fontStyle || 'Arial';
-				var txt = centerConfig.text;
-				var color = centerConfig.color || '#000';
-				var sidePadding = centerConfig.sidePadding || 20;
-				var sidePaddingCalculated = (sidePadding/100) * (chart.innerRadius * 2)
-        //Start with a base font of 30px
-        ctx.font = "30px " + fontStyle;
-
-				//Get the width of the string and also the width of the element minus 10 to give it 5px side padding
-				var stringWidth = ctx.measureText(txt).width;
-				var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
-
-        // Find out how much the font can grow in width.
-        var widthRatio = elementWidth / stringWidth;
-        var newFontSize = Math.floor(30 * widthRatio);
-        var elementHeight = (chart.innerRadius * 2);
-
-        // Pick a new font size so it will not be larger than the height of label.
-        var fontSizeToUse = Math.min(newFontSize, elementHeight);
-
-				//Set font settings to draw it correctly.
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
-				var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
-				ctx.font = fontSizeToUse+"px " + fontStyle;
-				ctx.fillStyle = color;
-
-        //Draw text in center
-        ctx.fillText(txt, centerX, centerY);
-    }
-}
-});
-
-
-var config = {
-	type: 'doughnut',
-	data: {
-			//	mousemove: abc,
-			datasets: [{
-				data: [
-				1,2,3,4,5
-				],
-				"backgroundColor":["rgb(255, 99, 132)","rgb(54, 162, 235)","rgb(255, 205, 86)"],
-					//"hoverBorderColor":["rgb(255, 91, 132)","rgb(54, 62, 235)","rgb(255, 5, 86)"],
-
-					label: 'Today Analysis'
-				}],
-				labels: [
-				'January 100% 00h 00m 00s',
-				'Orange',
-				'Yellow',
-				'Green',
-				'Blue'
-				]
-			},
-			options: {
-
-				responsive: true,
-				legend: {
-					display: false
-				},
-
-				title: {
-					display: false,
-					text: "Bestie Today's Analysis"
-				},
-				animation: {
-					animateScale: true,
-					animateRotate: true
-				},
-				events:["mousemove", "mouseout", "click", "touchstart", "touchmove"],
-
-				elements: {
-					center: {
-						text: '',
-          							color: '#FF6384', // Default is #000000
-          							fontStyle: 'Arial', // Default is Arial
-          							sidePadding: 20 // Defualt is 20 (as a percentage)
-          						}
-          					},
-				// events.click: function(e){alert("s")},
-				// onHover: function (e,t){
-				// 		alert("Event = " + e+" \n Part clicked  - ");
-				// }
-
-			}
-		};
 
 
 
-Chart.plugins.register({
-  afterDraw: function(chartInstance) {
-    if (chartInstance.config.options.showDatapoints) {
-      var helpers = Chart.helpers;
-      var ctx = chartInstance.chart.ctx;
-      var fontColor = helpers.getValueOrDefault(chartInstance.config.options.showDatapoints.fontColor, chartInstance.config.options.defaultFontColor);
 
-      // render the value of the chart above the bar
-      ctx.font = Chart.helpers.fontString("20", 'normal', Chart.defaults.global.defaultFontFamily);
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillStyle = "black";
+barConfig.options.hover.onHover = showBarDivResult;
 
-      chartInstance.data.datasets.forEach(function (dataset) {
-        for (var i = 0; i < dataset.data.length; i++) {
-          var model = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._model;
-          var scaleMax = dataset._meta[Object.keys(dataset._meta)[0]].data[i]._xScale.maxHeight;
-          //console.log(model.x);
-          var xPos = (scaleMax - model.x) / scaleMax >= -4.5 ? model.x + 40 : model.x - 5;
-          ctx.fillText(getTimeString(""+getTimeSpend(dataset.data[i])), xPos, model.y + 12);
-        }
-      });
-    }
-  }
-});
-
-		var barConfig = {
-			type: 'horizontalBar',
-			ticks:{
-				display:false
-			},
-			data: {
-				labels:['Time'],
-				datasets:[{
-					label:'Time',
-					data:[1]
-				}
-				]
-			},
-			options: {
-				showDatapoints: true,
-				hover:{
-					onHover:showBarDivResult
-				},
-				responsive: true,
-				intersect: true,
-				maintainAspectRatio:false,
-				legend: {
-					display: false
-				},
-				scales: {
-					xAxes: [{
-						stacked:true,
-						ticks:{
-							beginAtZero: true,
-							display:false
-						}
-					}],
-					yAxes: [{ stacked: true }]
-				}
-			}
-		};
-
-
-
-function getTimeSpend(time){
-	time = (+time) / 1000;
-	time = (~~time);
-	if(time < 60)
-		return time;
-	var sec = time % 60;
-	time /= 60;
-	time = (~~time);
-	if(time < 60)
-		return time+","+sec;
-	var min = time % 60;
-	time /= 60;
-	time = (~~time);
-	return ""+time+","+min+","+sec;
-}
-
-function getTimeString(timeParts){
-	var formattedTime = "";
-	var time = timeParts.split(",");
-	if(time.length === 3){
-		formattedTime = time[0]+"h"+time[1]+"m"+time[2]+"s";
-	}
-	else if(time.length === 2){
-		formattedTime = time[0]+"m"+time[1]+"s";
-	}
-	else if(time.length === 1){
-		formattedTime = time[0]+"s";
-	}
-	return formattedTime;
-}
 
 
 window.onload = function(){
 
-
-//	document.getElementById("date_selector").datepicker();
-	//console.log("hello");
-	//document.body.style.backgroundImage = "url('img1.jpg')";
+    document.getElementById("analysis_header").addEventListener("click", getTypeOfAnalysis);
+    document.getElementById("stats_header").addEventListener("click", getTypeOfStats);
+    document.getElementById("select_date").addEventListener("click", getAnalysisForSelectedDay);
+    document.getElementById("select_month").addEventListener("click", getStatsForSelectedMonth);
+    document.getElementById("select_range").addEventListener("click", getStatsForSelectedRange);
+    document.getElementById("update_sites").addEventListener("click", showSocialSitesDiv);
+    document.getElementById("update_alert_time").addEventListener("click", changeAlertTime);
+    document.getElementById("site_used").addEventListener("click", removeSite);
+    document.getElementById("add_sitename").addEventListener("click", addSite);
+    document.getElementById("set_alert_time").addEventListener("click", updateAlertTime);
+    document.getElementById("cover").addEventListener("click", hideHoveringDiv);
 
 	initiallize();
-
 }
 
 
 
 function initiallize(){
-	document.getElementById("analysis_header").addEventListener("click", getTypeOfAnalysis);
-	document.getElementById("stats_header").addEventListener("click", getTypeOfStats);
-	document.getElementById("select_date").addEventListener("click", getAnalysisForSelectedDay);
-	document.getElementById("select_month").addEventListener("click", getStatsForSelectedMonth);
-	document.getElementById("select_range").addEventListener("click", getStatsForSelectedRange);
-	document.getElementById("update_sites").addEventListener("click", showSocialSitesDiv);
-	document.getElementById("update_alert_time").addEventListener("click", changeAlertTime);
-	document.getElementById("site_used").addEventListener("click", removeSite);
-	document.getElementById("add_sitename").addEventListener("click", addSite);
-	document.getElementById("set_alert_time").addEventListener("click", updateAlertTime);
-	document.getElementById("cover").addEventListener("click", hideHoveringDiv);
 
-
-
-	//document.getElementById("update_alert_time").addEventListener("click", updateAlertTime);
 	var x = document.querySelectorAll("#close");
 	for(var close of x)setCloseListener(close);
 
@@ -276,7 +73,7 @@ function initiallize(){
 	document.getElementById("default_list").addEventListener("click",getDefaultRangeOption);
 	activeDeafultStats = document.getElementById("cur_week");
 
-		document.getElementById("about_us").addEventListener("click", aboutUs);
+	document.getElementById("about_us").addEventListener("click", aboutUs);
 	setListenersToTable();
 	//setBarChartListeners();
 	var curDate = new Date();
@@ -332,46 +129,11 @@ function showSites(socialSites) {
 }
 
 
-// chrome.runtime.sendMessage(EXTENSION_ID, {fetch: null},
-//             function (response) {
-//                 // if (response.success)
-//                 console.log(response);
-//                 //alert(response.socialSites);
-//                 resolve(response);
-//
-//             });
 
-function fetchKey( key) {
-	return new Promise(function(resolve, reject) {
-        chrome.runtime.sendMessage(EXTENSION_ID, {fetch: key},
-            function (response) {
-                // if (response.success)
-                console.log(response);
-                //alert(response.socialSites);
-                resolve(response);
 
-            });
-    });
-}
-
-function updateKey(key, value) {
-	return new Promise(function(resolve, reject) {
-        chrome.runtime.sendMessage(EXTENSION_ID, {update: [key, value]},
-            function (response) {
-                // if (response.success)
-                console.log(response);
-                //alert(response.socialSites);
-                return response;
-            });
-    });
-}
-
-// var req = updateSocialSites(['youtube','facebook', 'instagram']);
-// var res = fetchKey(["socialSites"]);
-//
 
 async function updateSocialSites(socialSiteList){
-			await updateKey("socialSites",socialSiteList);
+			var l = await updateKey("socialSites",socialSiteList);
            var curDate = new Date();
            showChart(curDate);
            activeAnalysisHeader.style.color = "grey";
@@ -384,9 +146,7 @@ async function updateSocialSites(socialSiteList){
            activeDeafultStats.style.color = "black";
 }
 
-// function fetchSocialSites(resolve, reject){
-//     resolve(fetchKey(["socialSites"]));
-// }
+
 
 async function removeSite(e){
 	if(e.target.className === "btn" || e.target.parentNode.parentNode.className === "btn" || e.target.parentNode.className === "btn"){
@@ -869,6 +629,8 @@ function getTypeOfAnalysis(e){
 async function showChart(date){
     var result = await fetchKey("socialSites");
     var socialSites = result.socialSites;
+
+
 	data = [];
 	totalTimeSpend = 0;
 	bColor = [];
@@ -881,25 +643,30 @@ async function showChart(date){
 		key = ""+today.getFullYear()+today.getMonth()+today.getDate();
 	fetchKey(key).then(function(result){
 		console.log(result[key]);
-		if(result[key]){
-			var summary = result[key]["summary"];
-			var i = 0;
-			for(var site in summary){
-				if(!socialSites.includes(site))
-					continue;
-				data.push(((+summary[site])));
-				totalTimeSpend += (+summary[site]);
-				console.log("Total Time Spend Today = " + totalTimeSpend);
-				//labels.push(site);
-				bColor.push(BGCOLOR[i++]);
-			}
-			todayData.datasets[0].backgroundColor = bColor;
-			todayData.datasets[0].data = data;
+		if(result[key]) {
+            var summary = result[key]["summary"];
+            var i = 0;
+            for (var site of socialSites) {
+                if (summary.hasOwnProperty(site)) {
+                    data.push(((+summary[site])));
+                    totalTimeSpend += (+summary[site]);
+                    console.log("Total Time Spend Today = " + totalTimeSpend);
+                    //labels.push(site);
 
-			createTable(result[key]["summary"], socialSites);
-			todayData.labels = labels;
+                }
+                else {
+                    data.push(0);
+                }
+                bColor.push(BGCOLOR[i++]);
+            }
+                todayData.datasets[0].backgroundColor = bColor;
+                todayData.datasets[0].data = data;
 
-		}
+                createTable(result[key]["summary"], socialSites);
+                todayData.labels = labels;
+
+
+        }
 		else if(date === null){
 			var tt = 0;
 			var totalSummary = {};
@@ -907,11 +674,10 @@ async function showChart(date){
 				if(setOfKeys.has(k))
 					continue;
 				var summary = result[k]["summary"];
-				for(var site in summary){
-					if(!socialSites.includes(site))
-						continue;
+				for(var site of socialSites){
 					if(!totalSummary.hasOwnProperty(site))
 						totalSummary[site] = 0;
+					if(summary.hasOwnProperty(site))
 					totalSummary[site] += summary[site];
 				}
 			}
@@ -1026,11 +792,14 @@ canvas.onmouseout =function(e){
 
 function createTable(result, socialSites){
 	var i = 0;
-	for (var key in result){
-		if(socialSites.includes(key)){
-		dataTable.appendChild(createRow(result, key, i));
+	var res = {};
+	for (var key of socialSites){
+		if(result.hasOwnProperty(key))
+    		res[key] = result[key];
+		else
+			res[key] = 0;
+		dataTable.appendChild(createRow(res, key, i));
 		i++;
-		}
 	}
 }
 

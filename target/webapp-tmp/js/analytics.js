@@ -39,7 +39,7 @@ window.onload = function(){
 	// 	document.getElementById('setTime').addEventListener('click', setTime);
 	//
 	// 	console.log("AFter make = "+JSON.stringify(socialSiteList));
-		document.getElementById("home").style.backgroundImage =  "url('img.jpg')";
+		document.getElementById("home").style.backgroundImage =  "url('images/img.jpg')";
 		// document.getElementById("add").addEventListener("click", handler.addSocialSite);
 		// view.displaySocialSites();
 		// startTime = document.getElementById("startTime");
