@@ -82,10 +82,23 @@ function initiallize(){
 	//showStats(curDate.getMonth(), null);
     document.getElementById("default_ranges").innerText = "Current Week Stats";
 	getCurrentWeekStats();
+	check();
 }
 
 
-
+async function check(){
+   // await new Promise((resolve, reject) => {setTimeout(() => resolve("done!"), 5000)});
+   //  var curDate = new Date("2017","04","06");
+   //  showChart(curDate);
+   //  activeAnalysisHeader.style.color = "grey";
+   //  activeAnalysisHeader = document.getElementById("today");
+   //  activeAnalysisHeader.style.color = "black";
+   //  getCurrentWeekStats();
+   //  document.getElementById("default_ranges").innerText = "Current Week Stats";
+   //  activeDeafultStats.style.color = "grey";
+   //  activeDeafultStats = document.getElementById("cur_week");
+   //  activeDeafultStats.style.color = "black";
+}
 
 
 function setCloseListener(x){

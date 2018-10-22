@@ -65,7 +65,15 @@ var config = {
         ]
     },
     options: {
-
+        // layout: {
+        //     padding: {
+        //         left: 50,
+        //         right: 0,
+        //         top: 0,
+        //         bottom: 0
+        //     }
+        // },
+       
         responsive: true,
         legend: {
             display: false
