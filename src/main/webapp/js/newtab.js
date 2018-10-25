@@ -82,6 +82,7 @@ function initiallize(){
 	//showStats(curDate.getMonth(), null);
     document.getElementById("default_ranges").innerText = "Current Week Stats";
 	//getCurrentWeekStats();
+	document.getElementById("custom_alert_time").addEventListener("click", );
 	check();
 }
 
@@ -228,6 +229,10 @@ async function changeAlertTime(e) {
         minOutput.innerText = this.value;
     }
 }
+
+// function createAlertProgressBar(){
+//
+// }
 
 
 
@@ -637,8 +642,12 @@ function getTypeOfAnalysis(e){
 		showChart(null);
 	}
 	if(e.target.id === "stats"){
-		getCurrentWeekStats();
+        activeDeafultStats.style.color = "grey";
+        activeDeafultStats = document.getElementById("cur_week");
+        activeDeafultStats.style.color = "black";
+        getCurrentWeekStats();
 		document.getElementById("statistics").style.display = "block";
+        document.getElementById("default_ranges").innerText = activeDeafultStats.innerText;
 	}
 
 
@@ -765,6 +774,8 @@ function calculateTotalTimeSpendPercent(socialTime, timespan){
 	else if(!isNaN(timespan)){
 		timespan *= 1000;
         var per =  (socialTime/timespan*100).toFixed();
+        if(!per)
+        	per = 0;
         document.getElementById("percent_time_spend").innerText = per+"%";
         document.getElementById("total_time_spend_online").innerText = getTimeString(""+getTimeSpend(timespan));
 
