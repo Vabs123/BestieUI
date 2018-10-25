@@ -81,7 +81,7 @@ function initiallize(){
 	setDoughnutListeners();
 	//showStats(curDate.getMonth(), null);
     document.getElementById("default_ranges").innerText = "Current Week Stats";
-	getCurrentWeekStats();
+	//getCurrentWeekStats();
 	check();
 }
 
@@ -306,6 +306,7 @@ function fetchStatsData(date1, date2){
 		totalTime:[]
 	}
 	var labelsOfBarChart = [];
+	var onlineTime = 0;
 	fetchKey(null).then(function(result){
 		var sites = result["socialSites"];
 		for(var site of sites){
@@ -324,6 +325,7 @@ function fetchStatsData(date1, date2){
 					}
 				}
 				barDataset["totalTime"].push(totalTime);
+				onlineTime += result[key]["totalTime"];
 			}
 			else{
 				for(var site in barDataset)
@@ -333,6 +335,7 @@ function fetchStatsData(date1, date2){
 			d.setDate(d.getDate() + 1);
 		}
 		//showBarChartStacked(barDataset, labelsOfBarChart); Call when stacked
+		calculateTotalTimeSpendPercent(totalTime, onlineTime);
 		showBarChartUnstacked(barDataset, dateTemp);
 
 	});
@@ -506,6 +509,7 @@ function showBarChartUnstacked(barDataset, date1 ){
 }
 
 
+
 //todayData.datasets[0].data = data;
 function showBarChartStacked(barDataset, labelsOfBarChart){
 	var dataOfBarChart = [];
@@ -633,6 +637,7 @@ function getTypeOfAnalysis(e){
 		showChart(null);
 	}
 	if(e.target.id === "stats"){
+		getCurrentWeekStats();
 		document.getElementById("statistics").style.display = "block";
 	}
 
@@ -726,13 +731,17 @@ async function showChart(date){
 }
 
 function calculateTotalTimeSpendPercent(socialTime, timespan){
+
 	if(timespan === "today"){
 		var key = getKey(new Date());
 		fetchKey(key).then(
 			function (result) {
 				var totalTime = (~~result[key]["totalTime"])*1000;
 				var per =  (socialTime/totalTime*100).toFixed();
+				if(!per)
+					per = 0;
                 document.getElementById("percent_time_spent").innerText = per+"%";
+                document.getElementById("online_time").innerText = "spent today : "+getTimeString(""+getTimeSpend(totalTime));
             }
 		);
 	}
@@ -746,8 +755,19 @@ function calculateTotalTimeSpendPercent(socialTime, timespan){
 			}
 			totalTime *= 1000;
         var per =  (socialTime/totalTime*100).toFixed();
+
+        if(!per)
+        	per = 0;
         document.getElementById("percent_time_spent").innerText = per+"%";
+        document.getElementById("online_time").innerText = "spent all time : "+getTimeString(""+getTimeSpend(totalTime));
 		});
+	}
+	else if(!isNaN(timespan)){
+		timespan *= 1000;
+        var per =  (socialTime/timespan*100).toFixed();
+        document.getElementById("percent_time_spend").innerText = per+"%";
+        document.getElementById("total_time_spend_online").innerText = getTimeString(""+getTimeSpend(timespan));
+
 	}
 }
 //
@@ -866,6 +886,8 @@ function createTable(result, socialSites){
 function createRow(result, key, id){
 	var time = ""+getTimeSpend(result[key]);
 	var per = result[key] / totalTimeSpend * 100;
+	if(!per)
+		per = 0;
 	per = per.toFixed(2);
 	labels.push(key + " " + per+"%");
 	var timeParts = time.split(",");
