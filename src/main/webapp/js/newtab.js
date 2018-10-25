@@ -1,4 +1,4 @@
-
+//favicon.ico
 var data = [];
 var labels = [];
 var bColor = [];
@@ -679,7 +679,7 @@ async function showChart(date){
 
                 createTable(result[key]["summary"], socialSites);
                 todayData.labels = labels;
-
+            calculateTotalTimeSpendPercent(totalTimeSpend, "today");
 
         }
 		else if(date === null){
@@ -710,34 +710,62 @@ async function showChart(date){
 
 			createTable(totalSummary, socialSites);
 			todayData.labels = labels;
-
+            calculateTotalTimeSpendPercent(totalTimeSpend, "allTime");
 		}
 		else{
 			todayData.labels = ['No Data'];
 			todayData.datasets[0].data = ['1'];
 		}
-		setTotalTime(totalTimeSpend);
+        document.getElementById("time_spent").innerText = getTimeString(""+getTimeSpend(totalTimeSpend));
+
+	//	setTotalTime(totalTimeSpend);
 			todayAnalysis.update();
 			todayAnalysis.render();
 
 	});
 }
 
-function setTotalTime(totalTimeSpend){
-	var time = ""+getTimeSpend(totalTimeSpend);
-	var formattedTime = "";
-	var timeparts = time.split(",");
-    if(timeparts.length === 3){
-        formattedTime = timeparts[0]+":"+timeparts[1]+":"+timeparts[2];
-    }
-    else if(timeparts.length === 2){
-        formattedTime = "00:"+timeparts[0]+":"+timeparts[1];
-    }
-    else if(timeparts.length === 1){
-        formattedTime = "00:00:"+timeparts[0];
-    }
-    document.getElementById("time_spent").innerText = formattedTime;
+function calculateTotalTimeSpendPercent(socialTime, timespan){
+	if(timespan === "today"){
+		var key = getKey(new Date());
+		fetchKey(key).then(
+			function (result) {
+				var totalTime = (~~result[key]["totalTime"])*1000;
+				var per =  (socialTime/totalTime*100).toFixed();
+                document.getElementById("percent_time_spent").innerText = per+"%";
+            }
+		);
+	}
+	else if(timespan === "allTime"){
+		fetchKey(null).then((result)=>{
+			var totalTime = 0;
+			for(var key in result){
+				if(setOfKeys.has(key))
+					continue;
+				totalTime += ~~result[key]["totalTime"];
+			}
+			totalTime *= 1000;
+        var per =  (socialTime/totalTime*100).toFixed();
+        document.getElementById("percent_time_spent").innerText = per+"%";
+		});
+	}
 }
+//
+// function setTotalTime(totalTimeSpend){
+// 	var time = ""+getTimeSpend(totalTimeSpend);
+// 	var formattedTime = "";
+// 	var timeparts = time.split(",");
+//     if(timeparts.length === 3){
+//         formattedTime = timeparts[0]+":"+timeparts[1]+":"+timeparts[2];
+//     }
+//     else if(timeparts.length === 2){
+//         formattedTime = "00:"+timeparts[0]+":"+timeparts[1];
+//     }
+//     else if(timeparts.length === 1){
+//         formattedTime = "00:00:"+timeparts[0];
+//     }
+//     document.getElementById("time_spent").innerText = formattedTime;
+// }
 
 
 function setListenersToTable(){
@@ -879,6 +907,10 @@ function createRow(result, key, id){
 	s.style.backgroundColor=BGCOLOR[id];
 	var label = document.createElement('TD');
 	label.id = "l";
+
+    // var s = document.createElement("IMG");
+    // s.setAttribute("src", "");
+
 	label.appendChild(s);
 
 	var domain = document.createElement('TD');

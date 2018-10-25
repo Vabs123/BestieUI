@@ -18,10 +18,10 @@ function getTimeString(timeParts){
     var formattedTime = "";
     var time = timeParts.split(",");
     if(time.length === 3){
-        formattedTime = time[0]+"h"+time[1]+"m"+time[2]+"s";
+        formattedTime = time[0]+"h "+time[1]+"m "+time[2]+"s";
     }
     else if(time.length === 2){
-        formattedTime = time[0]+"m"+time[1]+"s";
+        formattedTime = time[0]+"m "+time[1]+"s";
     }
     else if(time.length === 1){
         formattedTime = time[0]+"s";
