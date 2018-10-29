@@ -15,7 +15,7 @@ var dataTable = null;
 var cur = null;
 var curRow = null;
 var active = null;
-var setOfKeys = new Set(['socialSites', 'notificationTime']);
+var setOfKeys = new Set(['socialSites', 'notificationTime', 'alert', 'customAlert']);
 var activeAnalysisHeader = null;
 var activeStatsHeader = null;
 var barMaxSiteTimeFind = {};
@@ -38,12 +38,13 @@ window.onload = function(){
     document.getElementById("select_month").addEventListener("click", getStatsForSelectedMonth);
     document.getElementById("select_range").addEventListener("click", getStatsForSelectedRange);
     document.getElementById("update_sites").addEventListener("click", showSocialSitesDiv);
-    document.getElementById("update_alert_time").addEventListener("click", changeAlertTime);
+    document.getElementById("update_alert_time").addEventListener("click", showAlertDiv);
     document.getElementById("site_used").addEventListener("click", removeSite);
     document.getElementById("add_sitename").addEventListener("click", addSite);
     document.getElementById("set_alert_time").addEventListener("click", updateAlertTime);
     document.getElementById("cover").addEventListener("click", hideHoveringDiv);
-
+	document.getElementById("custom_alert_time").addEventListener("click", customAlert);
+    document.getElementById("basic_alert_time").addEventListener("click", basicAlert);
 	initiallize();
 }
 
@@ -82,9 +83,178 @@ function initiallize(){
 	//showStats(curDate.getMonth(), null);
     document.getElementById("default_ranges").innerText = "Current Week Stats";
 	//getCurrentWeekStats();
-	document.getElementById("custom_alert_time").addEventListener("click", );
+
 	check();
 }
+
+
+
+function customAlert(){
+    fetchKey(["customAlert","socialSites"]).then((result) => {showCustomAlertDiv(result["customAlert"], result["socialSites"]);});
+}
+
+
+function basicAlert(){
+    fetchKey("notificationTime").then((result) => {showBasicAlertDiv(result.notificationTime);});
+}
+
+function showAlertDiv(){
+	fetchKey("alert").then((result) => {
+		if(result["alert"] === "basic")
+			basicAlert();
+		else
+			customAlert();
+	});
+}
+
+function showCustomAlertDiv(customAlert, socialSites){
+	var setter = "";
+	var time = {hour:0, min:30};
+	var i = 0;
+	for(var site of socialSites){
+		setter += '<label>'+site+'</label><br><input type="range" min="0" max="23" value="1" class="slider" id = "hour'+i+'">'+
+            '   <span id="hour_value'+i+'"></span> hours'+
+            '   <input type="range" min="1" max="60" value="45" class="slider" id = "min'+i+'">'+
+            '  <span id="min_value'+i+'"></span> mins';
+
+		i++;
+	}
+	document.getElementById("custom_alert_time").style.display = "none";
+    document.getElementById("basic_alert_time").style.display = "block";
+
+
+
+    var alertTime = document.getElementById("hover_notification_div");
+    document.getElementById("cover").style.display = "block";
+	alertTime.style.display = "block";
+    alertTime.style.left = "20%";
+    alertTime.style.width = "60%";
+
+    var alertDiv = document.getElementById("alert");
+    alertDiv.innerHTML = setter;
+    alertDiv.style.height = "400px";
+
+    for(i = 0; i < socialSites.length; i++){
+        if(!customAlert.hasOwnProperty(socialSites[i]))
+            time = {hour:0, min:30};
+        else
+        	time = customAlert[socialSites[i]];
+
+        var hourSlider = document.getElementById("hour"+i);
+        hourSlider.value = time.hour;
+        var minSlider = document.getElementById("min"+i);
+        minSlider.value = time.min;
+        var hourOutput = document.getElementById("hour_value"+i);
+        var minOutput = document.getElementById("min_value"+i);
+        hourOutput.innerHTML = hourSlider.value;
+        minOutput.innerHTML = minSlider.value;
+        hourSlider.oninput = function() {
+        	var id = this.id.replace(/[^0-9]/g, "");
+            document.getElementById("hour_value"+id).innerHTML = this.value;
+        }
+        minSlider.oninput = function () {
+            var id = this.id.replace(/[^0-9]/g, "");
+            document.getElementById("min_value"+id).innerHTML = this.value;
+        }
+	}
+}
+
+function showBasicAlertDiv(time){
+    var timeParts = time.split(":");
+    var hours = timeParts[0];
+    var mins = timeParts[1];
+
+    document.getElementById("custom_alert_time").style.display = "block";
+    document.getElementById("basic_alert_time").style.display = "none";
+
+    document.getElementById("hover_notification_div").style.display = "block";
+    document.getElementById("cover").style.display = "block";
+
+    var alertDiv = document.getElementById("alert");
+    alertDiv.innerHTML = "";
+	alertDiv.style.height = "170px";
+    var setter = '<input type="range" min="0" max="23" value="1" class="slider" id = "hour">'+
+        '   <span id="hour_value"></span> hours'+
+        '   <input type="range" min="1" max="60" value="45" class="slider" id = "min">'+
+        '  <span id="min_value"></span> mins';
+	alertDiv.innerHTML = setter;
+
+    var hourSlider = document.getElementById("hour");
+    hourSlider.value = hours;
+    var minSlider = document.getElementById("min");
+    minSlider.value = mins;
+    var hourOutput = document.getElementById("hour_value");
+    var minOutput = document.getElementById("min_value");
+    hourOutput.innerHTML = hourSlider.value;
+    minOutput.innerHTML = minSlider.value;
+    hourSlider.oninput = function() {
+        hourOutput.innerHTML = this.value;
+    }
+    minSlider.oninput = function () {
+        minOutput.innerText = this.value;
+    }
+}
+
+
+function updateAlertTime(){
+
+    if(document.getElementById("basic_alert_time").style.display === "none"){
+        var hour = document.getElementById("hour_value").innerText;
+        var min = document.getElementById("min_value").innerText;
+        setBasicAlertTime(hour, min);
+	}
+	else{
+        fetchKey(["socialSites"]).then((result) => {
+            var customAlert = {};
+        	var  i = 0;
+        	for(var site of result["socialSites"]){
+            	var hour = document.getElementById("hour_value"+i).innerText;
+            	var min = document.getElementById("min_value"+i).innerText;
+            	customAlert[site] = {hour:hour,min:min};
+            	i++;
+        	}
+        	setCustomAlertTime(customAlert);
+        });
+	}
+}
+
+
+// async function changeAlertTime(e) {
+//     var result = await fetchKey("notificationTime");
+//     var time = result.notificationTime;
+//     var timeParts = time.split(":");
+//     var hours = timeParts[0];
+//     var mins = timeParts[1];
+//     document.getElementById("hover_notification_div").style.display = "block";
+//     document.getElementById("cover").style.display = "block";
+//     var hourSlider = document.getElementById("hour");
+//     hourSlider.value = hours;
+//     var minSlider = document.getElementById("min");
+//     minSlider.value = mins;
+//     var hourOutput = document.getElementById("hour_value");
+//     var minOutput = document.getElementById("min_value");
+//     hourOutput.innerHTML = hourSlider.value;
+//     minOutput.innerHTML = minSlider.value;
+//     hourSlider.oninput = function() {
+//         hourOutput.innerHTML = this.value;
+//     }
+//     minSlider.oninput = function () {
+//         minOutput.innerText = this.value;
+//     }
+// }
+
+function setBasicAlertTime(hours, mins){
+    var time = hours+":"+mins;
+    // chrome.storage.sync.set({notificationTime: time}, function(){
+    // 	//show mark
+    // });
+    updateKey({notificationTime:time, alert : "basic"});
+}
+
+function setCustomAlertTime(customAlert){
+	updateKey({customAlert:customAlert, alert:"custom"});
+}
+
 
 
 async function check(){
@@ -147,7 +317,7 @@ function showSites(socialSites) {
 
 
 async function updateSocialSites(socialSiteList){
-			var l = await updateKey("socialSites",socialSiteList);
+			var l = await updateKey({socialSites:socialSiteList});
            var curDate = new Date();
            showChart(curDate);
            activeAnalysisHeader.style.color = "grey";
@@ -158,6 +328,14 @@ async function updateSocialSites(socialSiteList){
            activeDeafultStats.style.color = "grey";
            activeDeafultStats = document.getElementById("cur_week");
            activeDeafultStats.style.color = "black";
+           fetchKey("customAlert").then((result) => {
+
+           		for (var site of socialSiteList){
+           			if(!result.customAlert.hasOwnProperty(site))
+           					result.customAlert[site] = {hour:0, min:30};
+				}
+				updateKey(result);
+		   });
 }
 
 
@@ -190,45 +368,8 @@ async function addSite(e) {
 //     });
 // }
 
-function setAlertTime(hours, mins){
-	var time = hours+":"+mins;
-	// chrome.storage.sync.set({notificationTime: time}, function(){
-	// 	//show mark
-	// });
-	updateKey("notificationTime", time);
-}
-
-function updateAlertTime(){
-    var hour = document.getElementById("hour_value").innerText;
-    var min = document.getElementById("min_value").innerText;
-    setAlertTime(hour, min);
-}
 
 
-
-async function changeAlertTime(e) {
-	var result = await fetchKey("notificationTime");
-	var time = result.notificationTime;
-	var timeParts = time.split(":");
-	var hours = timeParts[0];
-	var mins = timeParts[1];
-    document.getElementById("hover_notification_div").style.display = "block";
-    document.getElementById("cover").style.display = "block";
-    var hourSlider = document.getElementById("hour");
-    hourSlider.value = hours;
-    var minSlider = document.getElementById("min");
-    minSlider.value = mins;
-    var hourOutput = document.getElementById("hour_value");
-    var minOutput = document.getElementById("min_value");
-    hourOutput.innerHTML = hourSlider.value;
-    minOutput.innerHTML = minSlider.value;
-    hourSlider.oninput = function() {
-        hourOutput.innerHTML = this.value;
-    }
-    minSlider.oninput = function () {
-        minOutput.innerText = this.value;
-    }
-}
 
 // function createAlertProgressBar(){
 //
@@ -307,6 +448,7 @@ function showStats(date1, date2){
 //2018912
 function fetchStatsData(date1, date2){
 	var dateTemp = new Date(date1);
+	var totalSocialTime = 0;
 	var barDataset = {
 		totalTime:[]
 	}
@@ -327,6 +469,7 @@ function fetchStatsData(date1, date2){
 						var time = (+result[key]["summary"][site]);
 						barDataset[site].push(time);
 						totalTime += time;
+						totalSocialTime += time;
 					}
 				}
 				barDataset["totalTime"].push(totalTime);
@@ -340,7 +483,7 @@ function fetchStatsData(date1, date2){
 			d.setDate(d.getDate() + 1);
 		}
 		//showBarChartStacked(barDataset, labelsOfBarChart); Call when stacked
-		calculateTotalTimeSpendPercent(totalTime, onlineTime);
+		calculateTotalTimeSpendPercent(totalSocialTime, onlineTime);
 		showBarChartUnstacked(barDataset, dateTemp);
 
 	});

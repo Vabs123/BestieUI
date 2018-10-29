@@ -13,9 +13,9 @@ function fetchKey( key) {
     });
 }
 
-function updateKey(key, value) {
+function updateKey(obj) {
     return new Promise(function(resolve, reject) {
-        chrome.runtime.sendMessage(EXTENSION_ID, {update: [key, value]},
+        chrome.runtime.sendMessage(EXTENSION_ID, {update: obj},
             function (response) {
                 // if (response.success)
                 console.log(response);
